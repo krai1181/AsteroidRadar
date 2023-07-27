@@ -54,6 +54,7 @@
                 app:layout_constraintBottom_toBottomOf="@id/tv_asteroid_date"
                 app:layout_constraintTop_toTopOf="@id/tv_asteroid_name"
                 statusIcon="@{asteroid.potentiallyHazardous}"
+                android:contentDescription="@string/potentially_hazardous_asteroid_icon"
                 tools:src="@drawable/ic_status_potentially_hazardous"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
