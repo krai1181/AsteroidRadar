@@ -58,6 +58,5 @@
                 tools:src="@drawable/ic_status_potentially_hazardous"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </RelativeLayout>
 </layout>
