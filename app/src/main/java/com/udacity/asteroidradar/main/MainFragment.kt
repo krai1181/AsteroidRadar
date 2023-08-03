@@ -57,11 +57,15 @@ class MainFragment : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
                     R.id.show_all_menu -> {
-                        viewModel.setCurrentFilter(AsteroidFilter.ALL)
+                        viewModel.setCurrentFilter(AsteroidFilter.WEEK)
                         true
                     }
                     R.id.show_today_menu -> {
                         viewModel.setCurrentFilter(AsteroidFilter.TODAY)
+                        true
+                    }
+                    R.id.show_saved_menu ->{
+                        viewModel.setCurrentFilter(AsteroidFilter.ALL)
                         true
                     }
                     else -> false

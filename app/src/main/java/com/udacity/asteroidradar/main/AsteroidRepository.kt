@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import com.udacity.asteroidradar.api.getCurrentFormattedDate
+import com.udacity.asteroidradar.api.getNextSevenDaysFormattedDates
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidDatabase
 import com.udacity.asteroidradar.database.asDomainModel
@@ -30,6 +31,11 @@ class AsteroidRepository(private val database: AsteroidDatabase) {
     var currentAsteroidsList = database.asteroidDao.getCurrentAsteroids(getCurrentFormattedDate()).map {
         it.asDomainModel()
     } 
+    
+    var weeklyAsteroidsList = database.asteroidDao.getWeeklyAsteroids(getCurrentFormattedDate(), 
+        getNextSevenDaysFormattedDates().last()).map { 
+        it.asDomainModel()
+    }
 
     private val _nasaImage = MutableLiveData<NasaImage>()
     val nasaImage: LiveData<NasaImage>

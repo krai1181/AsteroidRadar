@@ -11,7 +11,7 @@ import com.udacity.asteroidradar.network.Asteroid
 import com.udacity.asteroidradar.network.NasaImage
 import kotlinx.coroutines.launch
 
-enum class AsteroidFilter { TODAY, ALL }
+enum class AsteroidFilter { TODAY, ALL, WEEK }
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val database = getDatabase(application)
 
@@ -22,6 +22,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             when (it) {
                 AsteroidFilter.ALL -> return@switchMap repository.asteroids
                 AsteroidFilter.TODAY -> return@switchMap repository.currentAsteroidsList
+                AsteroidFilter.WEEK -> return@switchMap repository.weeklyAsteroidsList
                 else -> return@switchMap repository.asteroids
             }
         }
