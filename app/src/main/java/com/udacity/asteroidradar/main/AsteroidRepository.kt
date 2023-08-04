@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import com.udacity.asteroidradar.api.getCurrentFormattedDate
 import com.udacity.asteroidradar.api.getNextSevenDaysFormattedDates
+import com.udacity.asteroidradar.api.getNextWeekFormattedDates
 import com.udacity.asteroidradar.api.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.database.AsteroidDatabase
 import com.udacity.asteroidradar.database.asDomainModel
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
 
 enum class NASAImageApiStatus { DONE, ERROR }
@@ -32,7 +34,8 @@ class AsteroidRepository(private val database: AsteroidDatabase) {
         it.asDomainModel()
     } 
     
-    var weeklyAsteroidsList = database.asteroidDao.getWeeklyAsteroids(getCurrentFormattedDate(), 
+    var weeklyAsteroidsList = database.asteroidDao.getWeeklyAsteroids(
+        getNextSevenDaysFormattedDates()[1], 
         getNextSevenDaysFormattedDates().last()).map { 
         it.asDomainModel()
     }
@@ -52,7 +55,7 @@ class AsteroidRepository(private val database: AsteroidDatabase) {
         AsteroidApi.retrofitService.getAsteroidData().enqueue(object : Callback<String> {
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 _response.value = response.body()
-                insertData(response.body())
+                insertData(response.body(), getNextWeekFormattedDates())
             }
 
             override fun onFailure(call: Call<String>, t: Throwable) {
@@ -60,20 +63,32 @@ class AsteroidRepository(private val database: AsteroidDatabase) {
             }
 
         })
-
     }
 
-    private fun insertData(data: String?) {
+    fun saveAsteroids() {
+        AsteroidApi.retrofitService.getAsteroidData().enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                _response.value = response.body()
+                insertData(response.body(), getNextSevenDaysFormattedDates())
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                _response.value = "Failure ${t.message}"
+            }
+
+        })
+    }
+    private fun insertData(data: String?, formattedDates: ArrayList<String>) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 data?.let {
                     val jsonObject = JSONObject(it)
-                    val asteroidProperties = parseAsteroidsJsonResult(jsonObject)
+                    val asteroidProperties = parseAsteroidsJsonResult(jsonObject, formattedDates)
                     val networkAsteroidContainer = NetworkAsteroidContainer(asteroidProperties)
                     database.asteroidDao.insertAll(*networkAsteroidContainer.asDatabaseModel())
                 }
 
-            } catch (e: Exception) {
+            } catch (e: HttpException) {
                 println("Error: ${e.message}")
             }
 
@@ -87,7 +102,7 @@ class AsteroidRepository(private val database: AsteroidDatabase) {
             result.let {
                 _nasaImage.value = it
             }
-        } catch (e: Exception) {
+        } catch (e: HttpException) {
             _status.value = NASAImageApiStatus.ERROR
         }
     }

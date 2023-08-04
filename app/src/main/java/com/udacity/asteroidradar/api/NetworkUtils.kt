@@ -8,13 +8,12 @@ import java.util.Calendar
 import java.util.Locale
 
 
-fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
+fun parseAsteroidsJsonResult(jsonResult: JSONObject, formattedDates: ArrayList<String>): ArrayList<Asteroid> {
     val nearEarthObjectsJson = jsonResult.getJSONObject("near_earth_objects")
 
     val asteroidList = ArrayList<Asteroid>()
 
-    val nextSevenDaysFormattedDates = getNextSevenDaysFormattedDates()
-    for (formattedDate in nextSevenDaysFormattedDates) {
+    for (formattedDate in formattedDates) {
         if (nearEarthObjectsJson.has(formattedDate)) {
             val dateAsteroidJsonArray = nearEarthObjectsJson.getJSONArray(formattedDate)
 
@@ -47,7 +46,9 @@ fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
     return asteroidList
 }
 
-
+/**
+ *Returns dates' list including today
+ * */
  fun getNextSevenDaysFormattedDates(): ArrayList<String> {
     val formattedDateList = ArrayList<String>()
 
@@ -62,7 +63,28 @@ fun parseAsteroidsJsonResult(jsonResult: JSONObject): ArrayList<Asteroid> {
     return formattedDateList
 }
 
+/**
+ * Returns dates list for the next week starting from tomorrow 
+ * */
+fun getNextWeekFormattedDates(): ArrayList<String> {
+    val formattedDateList = ArrayList<String>()
 
+    val calendar = Calendar.getInstance()
+    // Set the start date as tomorrow
+    calendar.add(Calendar.DAY_OF_MONTH, 1)
+    val dateFormat = SimpleDateFormat(Constants.API_QUERY_DATE_FORMAT, Locale.getDefault())
+    
+    for (i in 1..Constants.DEFAULT_END_DATE_DAYS) {
+        formattedDateList.add(dateFormat.format(calendar.time))
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+    }
+
+    return formattedDateList
+}
+
+/***
+ * Returns the current day 
+ */
  fun getCurrentFormattedDate(): String {
     val formattedDate: String
     val calendar = Calendar.getInstance()

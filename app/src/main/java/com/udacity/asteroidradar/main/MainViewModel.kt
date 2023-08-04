@@ -42,7 +42,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         _filter.value = AsteroidFilter.ALL
         viewModelScope.launch {
-            repository.refreshAsteroids()
+            repository.saveAsteroids()
             repository.updateNasaImage()
             _nasaImageObject.value = repository.nasaImage.value
         }
